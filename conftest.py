@@ -13,9 +13,6 @@ def browser(request):
     browser = webdriver.Chrome()
     browser.maximize_window()
     browser.implicitly_wait(5)
-    lang = request.config.getoption("language")
-    link = f"http://selenium1py.pythonanywhere.com/{lang}/catalogue/coders-at-work_207/"
-    browser.get(link)
     yield browser
     print("\nquit browser..")
     browser.quit()
