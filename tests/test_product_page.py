@@ -1,34 +1,26 @@
+import random
 import time
 import pytest
 
 from pages.basket_page import BasketPage
+from pages.login_page import LoginPage
 from pages.product_page import ProductPage
 
 
-@pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
-def test_guest_can_add_to_button(browser, link):
-    page = ProductPage(browser, link)
-    page.open()
-    page.add_to_basket()
-    page.solve_quiz_and_get_code()
-    page.should_item_name_correct()
-
-
 @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"])
-def test_guest_cant_see_success_message_after_adding_product_to_basket(browser, link):
+def test_guest_cant_see_success_message_after_adding_product_to_basket(self, browser, link):
     page = ProductPage(browser, link)
     page.open()
     page.add_to_basket()
     page.should_not_be_success_message()
+
+
+@pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0"])
+def test_guest_can_add_to_basket(self, browser, link):
+    page = ProductPage(browser, link)
+    page.open()
+    page.add_to_basket()
+    page.should_item_name_correct()
 
 
 @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"])
@@ -61,7 +53,6 @@ def test_guest_can_go_to_login_page_from_product_page(browser, link):
     page.go_to_login_page()
 
 
-@pytest.mark.new
 @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"])
 def test_guest_cant_see_product_in_basket_opened_from_product_page(browser, link):
     page = ProductPage(browser, link)
@@ -70,3 +61,31 @@ def test_guest_cant_see_product_in_basket_opened_from_product_page(browser, link
     basket_page = BasketPage(browser, browser.current_url)
     basket_page.goods_should_not_to_be_presented()
     basket_page.should_be_empty_basket_alert()
+
+
+@pytest.mark.new
+class TestUserAddToBasketFromProductPage:
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        print('setup работает')
+        link = "http://selenium1py.pythonanywhere.com/ru/accounts/login/"
+        page = LoginPage(browser, link)
+        page.open()
+        email = str(time.time()) + "@fakemail.org"
+        password = str(time.time()) + str(random.randint(10, 99))
+        page.register_new_user(email, password)
+        page.should_be_authorized_user()
+
+    @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"])
+    def test_user_cant_see_success_message(self, browser, link):
+        page = ProductPage(browser, link)
+        print('первый тест пошел')
+        page.open()
+        page.should_not_be_success_message()
+
+    @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"])
+    def test_guest_can_add_product_to_basket(self, browser, link):
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_to_basket()
+        page.should_item_name_correct()
